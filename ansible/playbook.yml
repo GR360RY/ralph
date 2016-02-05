@@ -1,0 +1,35 @@
+---
+- hosts: all
+  sudo: true
+
+  vars:
+
+    ralph_db: ralph
+    ralph_db_user_username: someuser
+    ralph_db_user_password: somepassword
+
+  tasks:
+
+  - name: Add ralph apt key
+    # apt_key: keyserver=keyserver.ubuntu.com id=D401AB61 state=present
+    apt_key: keyserver=keyserver.ubuntu.com id=D401AB61 state=present
+
+  - name: Add ralph-ng repository
+    apt_repository: repo='deb https://dl.bintray.com/vi4m/ralph wheezy main' state=present
+
+  - name: Install Requirements and Ralph
+    apt: name={{ item }} state=installed update_cache=yes cache_valid_time=3600
+    with_items:
+      - python-mysqldb
+      - ralph-core
+      - redis-server 
+      - mysql-server
+
+  - name: Create Ralph MySQL Database
+    mysql_db: name={{ ralph_db }} state=present
+
+  - name: Create Ralph Database User
+    mysql_user: name={{ ralph_db_user_username }} password={{ ralph_db_user_password }} priv=*.*:ALL state=present
+
+
+
